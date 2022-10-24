@@ -18,7 +18,7 @@ CREATE TABLE runs (
     ac_available INT ,
     sleeper_available INT ,
     PRIMARY KEY(train_number,departure_date),
-    FOREIGN KEY(train_number) references trains(number)
+    FOREIGN KEY(train_number) REFERENCES trains(number)
 );
 
 
@@ -29,8 +29,8 @@ CREATE TABLE tickets (
     train_number INT ,
     journey_date DATE ,
     passenger_name CHAR(16) ,
-    coach char(4) ,
+    coach CHAR(4) ,
     berth_type CHAR(2) ,
     berth_number INT ,
-    FOREIGN KEY(train_number) references trains(number)
+    FOREIGN KEY(train_number) REFERENCES trains(number)
 );
