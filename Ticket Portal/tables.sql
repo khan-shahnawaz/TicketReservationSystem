@@ -2,7 +2,6 @@
 
 
 --Train Information
-
 CREATE TABLE trains (
     number INT NOT NULL,
     name CHAR(50) ,
@@ -11,7 +10,6 @@ CREATE TABLE trains (
 
 
 --Keeps track of trains released into the system for booking
-
 CREATE TABLE runs (
     train_number INT NOT NULL,
     departure_date DATE NOT NULL,
@@ -21,18 +19,18 @@ CREATE TABLE runs (
     FOREIGN KEY(train_number) REFERENCES trains(number)
 );
 
+-- Enumrating all possible type of berths
+create type BERTH as enum ('LB', 'UB', 'MB', 'SL', 'SU');
+
 
 --Stores ticket information
-
 CREATE TABLE tickets (
     PNR SERIAL ,
     train_number INT ,
     journey_date DATE ,
     passenger_name CHAR(16) ,
     coach CHAR(4) ,
-    berth_type CHAR(2) ,
+    berth_type berth ,
     berth_number INT ,
     FOREIGN KEY(train_number) REFERENCES trains(number)
 );
-
-create type berth as enum ('LB', 'UB', 'MB', 'SL', 'SU');
