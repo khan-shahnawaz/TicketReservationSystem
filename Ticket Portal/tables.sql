@@ -15,8 +15,8 @@ CREATE TABLE trains (
 CREATE TABLE runs (
     train_number INT NOT NULL,
     departure_date DATE NOT NULL,
-    ac_available INT ,
-    sleeper_available INT ,
+    ac_coach INT,
+    sleeper_coach INT,
     PRIMARY KEY(train_number,departure_date),
     FOREIGN KEY(train_number) REFERENCES trains(number)
 );
@@ -34,3 +34,5 @@ CREATE TABLE tickets (
     berth_number INT ,
     FOREIGN KEY(train_number) REFERENCES trains(number)
 );
+
+create type berth as enum ('LB', 'UB', 'MB', 'SL', 'SU');
