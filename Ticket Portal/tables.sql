@@ -20,12 +20,15 @@ CREATE TABLE runs (
 );
 
 -- Enumrating all possible type of berths
-create type BERTH as enum ('LB', 'UB', 'MB', 'SL', 'SU');
+CREATE TYPE berth AS ENUM ('LB', 'UB', 'MB', 'SL', 'SU');
 
+CREATE TYPE seats_schema AS (
+    berth_number INT, coach INT, berth_type berth
+);
 
 --Stores ticket information
 CREATE TABLE tickets (
-    PNR SERIAL ,
+    PNR CHAR(19) ,
     train_number INT ,
     journey_date DATE ,
     passenger_name CHAR(16) ,
