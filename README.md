@@ -12,3 +12,5 @@ psql
 ```
 \i setup.sql
 ```
+
+## Relations

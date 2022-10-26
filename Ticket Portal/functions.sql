@@ -127,6 +127,35 @@ $$
         IF first_try='true' THEN
 
             EXECUTE FORMAT('SELECT ARRAY(SELECT row(berth_number, coach, berth_type) FROM %I LIMIT $1 FOR UPDATE SKIP LOCKED)',table_name) USING num_passengers INTO ticket_rows;
+            IF CARDINALITY(ticket_rows)<num_passengers THEN toreturn = ARRAY_APPEND(toreturn,'-3'); RETURN toreturn; END IF;
+            toreturn = ARRAY_APPEND(toreturn,'0');
+            i=1;
+            FOR rec IN (SELECT * FROM UNNEST(ticket_rows)) LOOP
+                IF i=1 THEN
+                    PNR_number = to_char(train_no,'fm00000') || to_char(journey_date,'YYYYMMDD')||to_char(rec.berth_number,'fm00')||to_char(rec.coach,'fm000');
+                    IF coach_type='A' THEN PNR_number = PNR_number||'0'; END IF;
+                    IF coach_type='S' THEN PNR_number = PNR_number||'1'; END IF;
+                    toreturn = ARRAY_APPEND(toreturn,PNR_number);
+
+                END IF;
+
+                toreturn = ARRAY_APPEND(toreturn,rec.berth_number::TEXT);
+                toreturn = ARRAY_APPEND(toreturn,rec.coach::TEXT);
+                toreturn = ARRAY_APPEND(toreturn,rec.berth_type::TEXT);
+                Coach_id = coach_type||rec.coach::TEXT;
+                EXECUTE FORMAT('DELETE FROM %I WHERE berth_number=$1 AND coach=$2 AND berth_type=$3',table_name) USING rec.berth_number,rec.coach,rec.berth_type;
+                EXECUTE FORMAT('INSERT INTO tickets(PNR, train_number, journey_date ,passenger_name ,coach, berth_type , berth_number) VALUES
+                ($1,$2,$3,$4,$5,$6,$7)') USING PNR_number,train_no,journey_date, names[i], Coach_id, rec.berth_type, rec.berth_number;
+                
+                i=i+1;
+            END LOOP;
+            RETURN toreturn;
+        END IF;
+
+        IF first_try='false' THEN
+
+            EXECUTE FORMAT('LOCK %I;',table_name);
+            EXECUTE FORMAT('SELECT ARRAY(SELECT row(berth_number, coach, berth_type) FROM %I LIMIT $1)',table_name) USING num_passengers INTO ticket_rows;
             IF CARDINALITY(ticket_rows)<num_passengers THEN toreturn = ARRAY_APPEND(toreturn,'-2'); RETURN toreturn; END IF;
             toreturn = ARRAY_APPEND(toreturn,'0');
             i=1;
@@ -149,9 +178,8 @@ $$
                 
                 i=i+1;
             END LOOP;
-            
+            RETURN toreturn;
         END IF;
-        RETURN toreturn;
     END;
 $$
 LANGUAGE plpgsql;
