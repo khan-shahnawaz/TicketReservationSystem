@@ -1,0 +1,1 @@
+\i 'Dummy/dummy_data.sql'

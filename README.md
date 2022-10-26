@@ -57,6 +57,6 @@ psql
         - It takes the input in the format specified above. In the first attempt, first_try is 'true'.
         - First it checks whether the train is released into the booking system or not. If not booking is failed with EXIT CODE -1.
         - Then it checks whether there are enough seats(locked or unlocked) in the system. If not, booking is failed with exit code -2.
-        - Then, it tries to lock the rows to book the seats. If it is not able to lock enough rows, it returns with EXIT CODE -3. If it returns with this EXIT CODE, then application should retry calling the same function again with same arguments but first_try = 'false'. This time, it will try to lock the entire table and it is guaranteed that it will return with EXIT CODE -2 or EXIT CODE 0 this time.
+        - Then, it tries to lock the rows to book the seats. If it is not able to lock enough rows, it returns with EXIT CODE -3. If it returns with this EXIT CODE, then application should retry calling the same function again with same arguments but with first_try = 'false'. This time, it will try to lock the entire table and it is guaranteed that it will not return with EXIT CODE -3 this time.
         - If it able to acquire locks for enough rows, then booking is successful and it will return with EXIT CODE 0 and will have other details like PNR, coach and berth of all passengers in the output array. The corresponding rows will be deleted from the table so that others cannot book the same ticket. Corresponding entries will be added in the tickets relation.
         
