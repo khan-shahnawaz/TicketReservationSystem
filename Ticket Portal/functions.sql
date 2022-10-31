@@ -84,7 +84,7 @@ $$
     
         EXECUTE FORMAT('DROP TABLE IF EXISTS %I;', ac_table_name);
         EXECUTE FORMAT('DROP TABLE IF EXISTS %I;', sleeper_table_name);
-
+        EXECUTE FORMAT('DELETE FROM TICKETS WHERE train_number = $1 AND journey_date = $2;') USING OLD.train_number, OLD.departure_date;
         RETURN OLD;
     END;
 $$
@@ -138,11 +138,11 @@ $$
                     toreturn = ARRAY_APPEND(toreturn,PNR_number);
 
                 END IF;
-
-                toreturn = ARRAY_APPEND(toreturn,rec.berth_number::TEXT);
-                toreturn = ARRAY_APPEND(toreturn,rec.coach::TEXT);
-                toreturn = ARRAY_APPEND(toreturn,rec.berth_type::TEXT);
                 Coach_id = coach_type||rec.coach::TEXT;
+                toreturn = ARRAY_APPEND(toreturn,rec.berth_number::TEXT);
+                toreturn = ARRAY_APPEND(toreturn,Coach_id::TEXT);
+                toreturn = ARRAY_APPEND(toreturn,rec.berth_type::TEXT);
+                
                 EXECUTE FORMAT('DELETE FROM %I WHERE berth_number=$1 AND coach=$2 AND berth_type=$3',table_name) USING rec.berth_number,rec.coach,rec.berth_type;
                 EXECUTE FORMAT('INSERT INTO tickets(PNR, train_number, journey_date ,passenger_name ,coach, berth_type , berth_number) VALUES
                 ($1,$2,$3,$4,$5,$6,$7)') USING PNR_number,train_no,journey_date, names[i], Coach_id, rec.berth_type, rec.berth_number;
@@ -168,10 +168,10 @@ $$
 
                 END IF;
 
-                toreturn = ARRAY_APPEND(toreturn,rec.berth_number::TEXT);
-                toreturn = ARRAY_APPEND(toreturn,rec.coach::TEXT);
-                toreturn = ARRAY_APPEND(toreturn,rec.berth_type::TEXT);
                 Coach_id = coach_type||rec.coach::TEXT;
+                toreturn = ARRAY_APPEND(toreturn,rec.berth_number::TEXT);
+                toreturn = ARRAY_APPEND(toreturn,Coach_id::TEXT);
+                toreturn = ARRAY_APPEND(toreturn,rec.berth_type::TEXT);
                 EXECUTE FORMAT('DELETE FROM %I WHERE berth_number=$1 AND coach=$2 AND berth_type=$3',table_name) USING rec.berth_number,rec.coach,rec.berth_type;
                 EXECUTE FORMAT('INSERT INTO tickets(PNR, train_number, journey_date ,passenger_name ,coach, berth_type , berth_number) VALUES
                 ($1,$2,$3,$4,$5,$6,$7)') USING PNR_number,train_no,journey_date, names[i], Coach_id, rec.berth_type, rec.berth_number;
