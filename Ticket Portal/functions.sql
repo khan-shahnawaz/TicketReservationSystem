@@ -154,7 +154,7 @@ $$
 
         IF first_try='false' THEN
 
-            EXECUTE FORMAT('LOCK %I;',table_name);
+            EXECUTE FORMAT('LOCK %I IN EXCLUSIVE MODE;',table_name);
             EXECUTE FORMAT('SELECT ARRAY(SELECT row(berth_number, coach, berth_type) FROM %I LIMIT $1)',table_name) USING num_passengers INTO ticket_rows;
             IF CARDINALITY(ticket_rows)<num_passengers THEN toreturn = ARRAY_APPEND(toreturn,'-2'); RETURN toreturn; END IF;
             toreturn = ARRAY_APPEND(toreturn,'0');
