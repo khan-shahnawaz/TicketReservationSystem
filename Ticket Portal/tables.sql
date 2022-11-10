@@ -6,7 +6,7 @@ CREATE TABLE trains (
     number INT NOT NULL,
     name CHAR(50) ,
     PRIMARY KEY(number)
-    );
+);
 
 
 --Keeps track of trains released into the system for booking
@@ -37,3 +37,25 @@ CREATE TABLE tickets (
     berth_number INT ,
     FOREIGN KEY(train_number) REFERENCES trains(number)
 );
+
+
+-- Part 2
+CREATE TABLE stations (
+    station_code CHAR(3) ,
+    station_name CHAR(30),
+    PRIMARY KEY(station_code)
+);
+
+CREATE TABLE schedules (
+    from_station CHAR(3),
+    to_station CHAR(3),
+    train_number INT,
+    source_day INT,
+    destination_day INT,
+    SDT time,
+    DAT time,
+    FOREIGN KEY(from_station) REFERENCES stations(station_code),
+    FOREIGN KEY(to_station) REFERENCES stations(station_code),
+    FOREIGN KEY(train_number) REFERENCES trains(number)
+);
+
