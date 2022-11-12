@@ -41,14 +41,14 @@ CREATE TABLE tickets (
 
 -- Part 2
 CREATE TABLE stations (
-    station_code CHAR(3) ,
+    station_code CHAR(4) ,
     station_name CHAR(30),
     PRIMARY KEY(station_code)
 );
 
 CREATE TABLE schedules (
-    from_station CHAR(3),
-    to_station CHAR(3),
+    from_station CHAR(4),
+    to_station CHAR(4),
     train_number INT,
     source_day INT,
     destination_day INT,
