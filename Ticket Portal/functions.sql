@@ -66,6 +66,8 @@ $$
                 EXECUTE FORMAT('INSERT INTO %I (berth_number, coach, berth_type) VALUES ($1,$2,$3)',sleeper_table_name) USING Berth_no, Coach_no, b_type;
             END LOOP;
         END LOOP;
+        EXECUTE FORMAT('CREATE INDEX %I ON %I USING HASH(coach);','hash'||ac_table_name,ac_table_name);
+        EXECUTE FORMAT('CREATE INDEX %I ON %I USING HASH(coach);','hash'||sleeper_table_name,sleeper_table_name);
         
     END;
 $$
