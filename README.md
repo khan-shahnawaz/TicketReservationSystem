@@ -81,7 +81,7 @@ psql
             -1|Train not released into the booking system|Train not released into the booking system|
             -2|Enough tickets are not available|Enough tickets are not available|
             -3|Tickets might be available but couldn't get enough locks. Application should call the function again after setting first_try='false'| Not possible|
-    - drop_seats_tables()
+- drop_seats_tables()
         - This function is mainly made for the trigger. It will automatically delete all tables, entries and tickets when the train is removed from the runs relation
 
 ## Triggers
