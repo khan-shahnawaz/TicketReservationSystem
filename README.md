@@ -1,5 +1,9 @@
 # TicketReservationSystem
 
+## About
+
+This is the implementation of an scalable database system for train tickets booking in postgres. It can handle multiple user accesses to the database system through concurrency control protocols. The schedules can be added and the journey plans be easily searched though the simple queries.
+
 ## Setup
 
 - Clone the repository and cd into the folder containing setup.sql
@@ -12,6 +16,7 @@ psql
 ```
 \i setup.sql
 ```
+- An implementation of an application designed to query this database by mulitple conncurrent threads can be found [Here](https://github.com/Blue-coder89/CS301-Backend/)
 
 ## Relations
 
@@ -32,6 +37,17 @@ psql
     - coach: Coach number can vary from A1-A999 and S1-S999. A denotes AC coach and S denotes Sleeper coach. Stored as CHAR(4).
     - berth_type: Can be LB, UB, MB, SL, SU
     - berth_number: An integer denoting berth number of the concerned passenger. Varies from 1-18 in AC coach and 1-24 in Sleeper Coaches.
+- stations (**station_code**, station_name)
+    - **station_code**: An alphabetical combination denoting each staion. Can be atmost 4 characters long.
+    - station_name: Name of the station of length atmost 30.
+- schedules (from_station, to_station, train_number, source_day, destination_day, SDT, DAT)
+    - from_station: Denotes the station from which train can depart.
+    - to_station: Denotes the station code at which the train can reach(All pairs of stations are stored to be stored in this relation)
+    - train_number: Train Number as a foreign key to trains relation.
+    - source_day: The day at which trains departs from the from_station. The source station has day 1 and it increses after midnight as the train progressess.
+    - destination_day: The day at which trains arrives at the to_station.
+    - SDT: Departure time from the from_station in HH:MM:SS format
+    - DAT: Arrival time at to_station in HH:MM:SS format.
 
 ## Stored Procedures and Functions
 
@@ -58,4 +74,34 @@ psql
         - Then it checks whether there are enough seats(locked or unlocked) in the system. If not, booking is failed with exit code -2.
         - Then, it tries to lock the rows to book the seats. If it is not able to lock enough rows, it returns with EXIT CODE -3. If it returns with this EXIT CODE, then application should retry calling the same function again with same arguments but with first_try = 'false'. This time, it will try to lock the entire table and it is guaranteed that it will not return with EXIT CODE -3 this time.
         - If it able to acquire locks for enough rows, then booking is successful and it will return with EXIT CODE 0 and will have other details like PNR, coach and berth of all passengers in the output array. The corresponding rows will be deleted from the table so that others cannot book the same ticket. Corresponding entries will be added in the tickets relation.
-        
+        - The Exit codes and their meaning can be summarised below:
+            Exit Code | first_try='true' | first_try='false'|
+            --- | --- | --- |
+            0 | The tickets are booked | The tickets are booked|
+            -1|Train not released into the booking system|Train not released into the booking system|
+            -2|Enough tickets are not available|Enough tickets are not available|
+            -3|Tickets might be available but couldn't get enough locks. Application should call the function again after setting first_try='false'| Not possible|
+    - drop_seats_tables()
+        - This function is mainly made for the trigger. It will automatically delete all tables, entries and tickets when the train is removed from the runs relation
+
+## Triggers
+
+- del_seats_table
+    - This trigger will delete tickets, tables of the corresponding train when the entry is deleted from the runs relation. The corresponding function is drop_seats_tables()
+
+## Journey Search Queries
+
+- For the direct journey plan, use the following sql query replacing the appropriate station codes:
+```
+SELECT 
+S.train_number,S.from_station,S.SDT as "Departure",S.to_station ,S.DAT as "Arrival" 
+FROM schedules as S 
+WHERE S.from_station = 'CDG' AND S.to_station = 'NDLS';
+```
+- For getting journey plan with one connecting train within 4 hours, use the following query:
+```
+SELECT S1.train_number,S1.from_station,S1.SDT,S1.to_station,S1.DAT,S2.train_number,S2.from_station,S2.SDT,S2.to_station,S2.DAT
+FROM schedules as S1, schedules as S2
+WHERE S1.from_station = 'CDG' AND S1.to_station = S2.from_station AND S2.to_station = 'NDLS'
+AND (S2.SDT - S1.DAT <= '04:00:00') AND (S2.SDT-S1.DAT>'00:00:00') AND S1.train_number<>S2.train_number;
+```
